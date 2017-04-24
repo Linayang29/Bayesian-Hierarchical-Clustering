@@ -17,7 +17,7 @@
 \usepackage{hyperref}
 
 
-\title{Implementation of Bayesian Hierachical Clustering} 
+\title{Implementation of Bayesian Hierachical Clustering}
 \author{Lina Yang, Xiaodi Qin}
 \date{\today}
 
@@ -25,6 +25,12 @@
 \maketitle
 
 \section{Abstract}
+
+
+Hierarchical clustering is commonly used in unsupervised learning. There are several limitations to the traditional hierarchical clustering, including no guide to pre-specify number of clusters, difficult to choose suitable distance metric, and lack of probability based criterion for model evaluation. To overcome these limitations, Heller and Ghahramani developed a Bayesian hierarchical clustering based on Dirichlet process mixtures. It uses marginal likelihoods and Bayesian hypothesis testing as criteria for merging cluster. 
+
+
+
 
 from paper \citep{heller_bayesian_2005}
 % 250 words or less. Identify 4-6 key phrases.
@@ -39,7 +45,7 @@ from paper \citep{heller_bayesian_2005}
 % % Is the background readable and clear?
 
 \section{Algorithm}
-% First, explain in plain English what the algorithm does. 
+% First, explain in plain English what the algorithm does.
 % Then describes the details of the algorihtm, using mathematical equations or pseudocode as appropriate.
 % Is the algorithm description clear and accurate?
 
@@ -64,9 +70,9 @@ from paper \citep{heller_bayesian_2005}
     $n_l = 1$, $d_l = \alpha$  \\
     $ml_l = family(X_l)$ \\
   }
-  
-  t = 0 
-  
+
+  t = 0
+
   \For{$i$ \text{in} $\textsc{range}(N-1)$}{
     \For{$j$ \text{in} $\textsc{range}(i+1, N)$}{
       $c1_t = i$, $c2_t = j$, $n_t = n_i + n_j$, $d_t = \alpha \Gamma (n_t) + d_i d_j$ \\
@@ -77,9 +83,9 @@ from paper \citep{heller_bayesian_2005}
       $t = t + 1$
     }
   }
-  
+
   $rm = []$, $Z=[]$ \\
-  
+
   \For{p in \textsc{range}(N-1)}{
     $idx = \argmax_{\{idx\in \{0,...,t\}, c1_{idx} \not\in rm, c2_{idx} \not\in rm\}} logodds$ \\
     $Z.\textsc{append}([c1_{idx}, c2_{idx}, logodds_{idx}, n_{idx}])$ \\
@@ -101,12 +107,12 @@ from paper \citep{heller_bayesian_2005}
       t = t + 1
     }
   }
-  
+
   \Return{$Z$}
 \end{algorithm}
 
 \section{Optimization}
-% First implement the algorithm using plain Python in a straightforward way from the description of the algorihtm. 
+% First implement the algorithm using plain Python in a straightforward way from the description of the algorihtm.
 % Then profile and optimize it using one or more apporpiate mathods, such as:
 
 % Profile for speed:
