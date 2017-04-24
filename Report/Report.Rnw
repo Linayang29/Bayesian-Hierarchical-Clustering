@@ -6,11 +6,15 @@
 \usepackage{float}
 \linespread{1.3}
 
+\usepackage[linesnumbered, ruled, vlined]{algorithm2e}
+\newcommand{\PP}{\text{P}}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
 \usepackage[nottoc,numbib]{tocbibind}
 \usepackage{natbib}
 \renewcommand\bibname{References}
 
-\usepackage[ruled]{algorithm2e}
+\usepackage{hyperref}
 
 
 \title{Implementation of Bayesian Hierachical Clustering} 
@@ -46,6 +50,60 @@ from paper \citep{heller_bayesian_2005}
 % % Are there alternative algorithms that should give the same answer?
 % Is the code tested? Are examples provided?
 
+\begin{algorithm}
+  %\setstretch{1.15}
+  \caption{Bayesian Hierachical Clustering}
+  \label{alg:bhc}
+  \SetStartEndCondition{ }{}{}%
+  \SetKw{KwTo}{in}\SetKwFor{For}{For}{\string:}{}%
+  \SetKwIF{If}{ElseIf}{Else}{If}{:}{elif}{else:}{}%
+  \SetAlgoNoEnd
+  \KwIn{Data $X=(X_0, X_1, ..., X_N)$, $family \in\{niw\}$, hyperparameter $\alpha$, scaling factor on the prior precision of the mean $r$.}
+  \KwOut{A linkage matrix $Z$}
+  \For{$l$ \text{in} $\textsc{range}(N)$}{
+    $n_l = 1$, $d_l = \alpha$  \\
+    $ml_l = family(X_l)$ \\
+  }
+  
+  t = 0 
+  
+  \For{$i$ \text{in} $\textsc{range}(N-1)$}{
+    \For{$j$ \text{in} $\textsc{range}(i+1, N)$}{
+      $c1_t = i$, $c2_t = j$, $n_t = n_i + n_j$, $d_t = \alpha \Gamma (n_t) + d_i d_j$ \\
+      $\pi_t = \alpha \Gamma (n_t) / d_t$ \\
+      $X_t = (X_i, X_j)^T$ \\
+      $\PP(D_t, H_1^t) = family(X_t) \pi_t$, $\PP(D_t, H_2^t) = ml_i\times ml_j (d_i d_j / d_t)$ \\
+      $logodds_t = \log{\PP(D_t, H_1^t)} - \log{\PP(D_t, H_2^t)}$ \\
+      $t = t + 1$
+    }
+  }
+  
+  $rm = []$, $Z=[]$ \\
+  
+  \For{p in \textsc{range}(N-1)}{
+    $idx = \argmax_{\{idx\in \{0,...,t\}, c1_{idx} \not\in rm, c2_{idx} \not\in rm\}} logodds$ \\
+    $Z.\textsc{append}([c1_{idx}, c2_{idx}, logodds_{idx}, n_{idx}])$ \\
+    $rm$.$\textsc{append}$($c1_{idx}, c2_{idx}$) \\
+
+    $maxlogodds = -Inf$ \\
+    \For{q in \textsc{range}(t)}{
+      \If{$c1_q \not\in rm$ and $c2_q \not\in rm$}{
+        $c1_{temp} = N + p$, $c2_{temp} = q$, $n_{temp} = n_{idx} + n_q$, $d_{temp} = \alpha \Gamma (n_{temp}) + d_{idx} d_q$ \\
+        $\pi_{temp} = \alpha \Gamma (n_{temp}) / d_{temp}$ \\
+        $X_{temp} = (X_{idx}, X_q)^T$, $ml_{idx} = family(X_{idx})$, $ml_q = family(X_q)$ \\
+        $\PP(D_{temp}, H_1^{temp}) = family(X_{temp}) \pi_t$, $\PP(D_{temp}, H_2^{temp}) = ml_{idx}\times ml_q (d_{idx} d_q / d_{temp})$ \\
+        $logodds_{temp} = \log{\PP(D_{temp}, H_1^{temp})} - \log{\PP(D_{temp}, H_2^{temp})}$ \\
+        \If{$logodds_{temp} > maxlogodds$}{
+          $c1_t = c1_{temp}, c2_t = c2_{temp}, n_t = n_{temp}$ \\
+          $d_t = d_{temp}, logodds_t = logodds_{temp}$ \\
+        }
+      }
+      t = t + 1
+    }
+  }
+  
+  \Return{$Z$}
+\end{algorithm}
 
 \section{Optimization}
 % First implement the algorithm using plain Python in a straightforward way from the description of the algorihtm. 
@@ -92,6 +150,8 @@ from paper \citep{heller_bayesian_2005}
 % Is the discussion readable and clear?
 
 \section{Code}
+
+The repository can be found at \url{https://github.com/qxxxd/Bayesian-Hierarchical-Clustering}.
 % The code should be in a public GitHub repository with:
 % % A README file
 % % An open source license

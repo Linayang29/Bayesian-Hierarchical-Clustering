@@ -14,7 +14,7 @@ def bhc(dat, family, alpha, r):
 
     # labels
 
-    # build tree
+    # build tree. Z = [leaf1, leaf2, weight, #leaves]
 
     return Z
 
