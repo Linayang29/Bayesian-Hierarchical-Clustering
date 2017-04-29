@@ -7,7 +7,8 @@
 \linespread{1.3}
 
 \usepackage[linesnumbered, ruled, vlined]{algorithm2e}
-\newcommand{\PP}{\text{P}}
+\newcommand{\PP}{\mathbb{P}}
+\newcommand{\SSS}{\mathbb{S}}
 \DeclareMathOperator*{\argmax}{arg\,max}
 
 \usepackage[nottoc,numbib]{tocbibind}
@@ -27,12 +28,7 @@
 \section{Abstract}
 
 
-Hierarchical clustering is commonly used in unsupervised learning. There are several limitations to the traditional hierarchical clustering, including no guide to pre-specify number of clusters, difficult to choose suitable distance metric, and lack of probability based criterion for model evaluation. To overcome these limitations, Heller and Ghahramani developed a Bayesian hierarchical clustering based on Dirichlet process mixtures. It uses marginal likelihoods and Bayesian hypothesis testing as criteria for merging cluster. 
-
-
-
-
-from paper \citep{heller_bayesian_2005}
+Hierarchical clustering is commonly used in unsupervised learning. There are several limitations to the traditional hierarchical clustering, including no guide to pre-specify number of clusters, difficult to choose suitable distance metric, and lack of probability based criterion for model evaluation. To overcome these limitations, \cite{heller_bayesian_2005} developed a Bayesian hierarchical clustering based on Dirichlet process mixtures. It uses marginal likelihoods and Bayesian hypothesis testing as criteria for merging cluster. 
 % 250 words or less. Identify 4-6 key phrases.
 % Is the abstract readable and clear?
 
@@ -61,51 +57,49 @@ from paper \citep{heller_bayesian_2005}
   \caption{Bayesian Hierachical Clustering}
   \label{alg:bhc}
   \SetStartEndCondition{ }{}{}%
-  \SetKw{KwTo}{in}\SetKwFor{For}{For}{\string:}{}%
-  \SetKwIF{If}{ElseIf}{Else}{If}{:}{elif}{else:}{}%
+  \SetKw{KwTo}{in}\SetKwFor{For}{For}{\string:}{}
+  \SetKwIF{If}{ElseIf}{Else}{If}{:}{elif}{else:}{}
+  \SetKwFor{While}{While}{:}{fintq}
   \SetAlgoNoEnd
   \KwIn{Data $X=(X_0, X_1, ..., X_N)$, $family \in\{niw\}$, hyperparameter $\alpha$, scaling factor on the prior precision of the mean $r$.}
   \KwOut{A linkage matrix $Z$}
-  \For{$l$ \text{in} $\textsc{range}(N)$}{
-    $n_l = 1$, $d_l = \alpha$  \\
-    $ml_l = family(X_l)$ \\
+  Set $\SSS =\emptyset$
+  
+  \For{$l\in \{0,1,\ldots, N-1\}$}{
+    $n^0_l = 1$, $d^0_l = \alpha$, $X^0_l = X_l$, $ml_l = \textsc{family}(X^0_l)$ \\
+    $\SSS = \SSS \cup \{l\}$
   }
 
-  t = 0
+  Set $t = 0$, $\PP =\emptyset$
 
-  \For{$i$ \text{in} $\textsc{range}(N-1)$}{
-    \For{$j$ \text{in} $\textsc{range}(i+1, N)$}{
-      $c1_t = i$, $c2_t = j$, $n_t = n_i + n_j$, $d_t = \alpha \Gamma (n_t) + d_i d_j$ \\
-      $\pi_t = \alpha \Gamma (n_t) / d_t$ \\
-      $X_t = (X_i, X_j)^T$ \\
-      $\PP(D_t, H_1^t) = family(X_t) \pi_t$, $\PP(D_t, H_2^t) = ml_i\times ml_j (d_i d_j / d_t)$ \\
-      $logodds_t = \log{\PP(D_t, H_1^t)} - \log{\PP(D_t, H_2^t)}$ \\
-      $t = t + 1$
+  \For{$i \in \{0,1,\ldots, N-2\}$}{
+    \For{$j \in \{i+1,\ldots, N-1\}$}{
+      $c_{1,t} = i$, $c_{2,t} = j$, $n_t = n^0_i + n^0_j$ \\
+      $X_t = (X^0_i, X^0_j)^T$, $d_t = \alpha \Gamma (n_t) + d^0_i d^0_j$ \\
+      $P_{1,t} = \textsc{family}(X_t) \alpha \Gamma (n_t) / d_t$, $P_{2,t} = ml_i ml_j (d^0_i d^0_j / d_t)$ \\
+      $logodds_t = \log{P_{1,t}} - \log{P_{2,t}}$ \\
+      $\PP = \PP \cup \{t\}$, $t = t + 1$
     }
   }
 
-  $rm = []$, $Z=[]$ \\
+  Set $p=0$, $Z=[]$ \\
 
-  \For{p in \textsc{range}(N-1)}{
-    $idx = \argmax_{\{idx\in \{0,...,t\}, c1_{idx} \not\in rm, c2_{idx} \not\in rm\}} logodds$ \\
-    $Z.\textsc{append}([c1_{idx}, c2_{idx}, logodds_{idx}, n_{idx}])$ \\
-    $rm$.$\textsc{append}$($c1_{idx}, c2_{idx}$) \\
+  \While{1}{
+    $idx = \argmax_{idx\in \PP} logodds$ \\
+    $Z.\textsc{append}([c_{1,idx}, c_{2,idx}, logodds_{idx}, n_{idx}])$ \\
+    $n^0_{N+p} = n_{idx}$, $X^0_{N+p} = X_{idx}$, $d^0_{N+p} = d_{idx}$, $ml_{N+p}=P_{1, idx}+P_{2, idx}$ \\
+    $rm = \{c_{1,idx}, c_{2,idx}\}$, $\SSS = \SSS \setminus rm$ \\
+    \If{$\SSS = \emptyset$}{$\textbf{break}$}
 
-    $maxlogodds = -Inf$ \\
-    \For{q in \textsc{range}(t)}{
-      \If{$c1_q \not\in rm$ and $c2_q \not\in rm$}{
-        $c1_{temp} = N + p$, $c2_{temp} = q$, $n_{temp} = n_{idx} + n_q$, $d_{temp} = \alpha \Gamma (n_{temp}) + d_{idx} d_q$ \\
-        $\pi_{temp} = \alpha \Gamma (n_{temp}) / d_{temp}$ \\
-        $X_{temp} = (X_{idx}, X_q)^T$, $ml_{idx} = family(X_{idx})$, $ml_q = family(X_q)$ \\
-        $\PP(D_{temp}, H_1^{temp}) = family(X_{temp}) \pi_t$, $\PP(D_{temp}, H_2^{temp}) = ml_{idx}\times ml_q (d_{idx} d_q / d_{temp})$ \\
-        $logodds_{temp} = \log{\PP(D_{temp}, H_1^{temp})} - \log{\PP(D_{temp}, H_2^{temp})}$ \\
-        \If{$logodds_{temp} > maxlogodds$}{
-          $c1_t = c1_{temp}, c2_t = c2_{temp}, n_t = n_{temp}$ \\
-          $d_t = d_{temp}, logodds_t = logodds_{temp}$ \\
-        }
-      }
-      t = t + 1
+    \For{$q \in \SSS$}{
+      $c_{1,t} = N+p$, $c_{2,t} = q$, $n_t = n^0_{N+p} + n^0_q$ \\
+      $X_t = (X^0_{N+p}, X^0_q)^T$, $d_t = \alpha \Gamma (n_t) + d^0_{N+p} d^0_q$\\
+      $P_{1,t} = \textsc{family}(X_t) \alpha \Gamma (n_t) / d_t$, $P_{2,t} = ml_{N+p} ml_q (d^0_{N+p} d^0_q / d_t)$ \\
+      $logodds_t = \log{P_{1,t}} - \log{P_{2,t}}$ \\
+      $\PP = \PP \cup \{t\}$, $t=t+1$
     }
+    $\PP = \PP \setminus \{r: c_{1,r} \in rm \vee c_{2,r} \in rm\}$\\ 
+    $\SSS = \SSS \cup \{N+p\}$, $p = p + 1$
   }
 
   \Return{$Z$}
