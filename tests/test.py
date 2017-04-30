@@ -39,6 +39,21 @@ plt.show()
 
 #-------------bernoulli data-------------#
 #bdat = np.genfromtxt('tests/bindat.csv', delimiter=',')
+
+def Bern_gen(nobs, k, theta, seed):
+    """Generate Bernoulli distributed data"""
+    np.random.seed(seed)
+    obs_list = []
+    theta_list = (np.repeat(theta,nobs))
+    theta_list[:int(nobs/3)] = np.repeat(theta-0.3, int(nobs/3))
+    theta_list[-int(nobs/3):] = np.repeat(theta+0.3, int(nobs/3))
+    for i in range(nobs):
+        X_i = np.random.binomial(1, theta_list[i], k)
+        obs_list.append(X_i)
+    return np.matrix(obs_list)
+
+#bdat = Bern_gen(30, 10, 0.5, 121)
+
 bdat = np.array([[0, 1, 0, 1, 0, 0, 0, 0, 0, 0],
         [0, 1, 0, 0, 1, 0, 1, 0, 0, 1],
         [0, 1, 0, 1, 1, 1, 1, 0, 0, 0],
