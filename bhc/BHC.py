@@ -16,9 +16,10 @@ def bhc(dat, family, alpha, r = 0.001):
         S = np.cov(dat.T)/10 # precision?
         mlfunc = partial(niw, m=m, S=S, r=r)
     elif family == "bernoulli":
-        cc=0.01
-        m = np.mean(np.vstack((dat, np.ones(k)*cc, np.zeros(k))), axis=0)
-        alp= m*2; beta=(1-m)*2
+        #cc=0.01
+        #m = np.mean(np.vstack((dat, np.ones(k)*cc, np.zeros(k))), axis=0)
+        #alp= m*2; beta=(1-m)*2
+        alp = 0.001; beta = 0.01
         mlfunc = partial(bb, α=alp, β=beta)
 
     # leaf nodes
