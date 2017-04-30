@@ -11,21 +11,21 @@ def bhclust(dat, family, alpha, r = 0.001):
         @r: scaling factor on the prior precision of the mean
     """
     N, k = dat.shape
+    la = log(alpha)
 
     if family == "multivariate":
         m = np.mean(dat, axis=0).reshape(k, 1)
         S = np.cov(dat.T)/10 # precision?
         mlfunc = partial(niw, m=m, S=S, r=r)
     elif family == "bernoulli":
-        #cc=0.01
-        #m = np.mean(np.vstack((dat, np.ones(k)*cc, np.zeros(k))), axis=0)
-        #alp= m*2; beta=(1-m)*2
-        alp = 0.001; beta = 0.01
+        #r=0.01
+        m = np.mean(np.vstack((dat, np.ones(k)*r, np.zeros(k))), axis=0)
+        alp= m*2; beta=(1-m)*2
         mlfunc = partial(bb, alp=alp, beta=beta)
 
     # leaf nodes
     SS = list(range(N))
-    x0 = []; d0 = [alpha] * N
+    x0 = []; d0 = [la] * N
     ml = []
     for l in range(N):
         x0.append((l,))
@@ -40,12 +40,15 @@ def bhclust(dat, family, alpha, r = 0.001):
         for j in range(i+1, N):
             c1.append(i); c2.append(j)
             x.append(x0[i]+x0[j])
-            d.append((alpha * gamma(len(x[t])) + d0[i] * d0[j]))
-            lp1.append(mlfunc(dat[x[t],:]) + np.log(alpha) + gammaln(len(x[t])) - np.log(d[t]))
-            lp2.append(ml[i] + ml[j] + np.log(d0[i]) + np.log(d0[j]) - np.log(d[t]))
+            u = la + gammaln(len(x[t]))
+            v = d0[i] + d0[j]
+            d.append((u + log(1 + exp(v - u))))
+            lp1.append(mlfunc(dat[x[t],:]) + np.log(alpha) + gammaln(len(x[t])) - d[t])
+            lp2.append(ml[i] + ml[j] + d0[i] + d0[j] - d[t])
             lodds.append(lp1[t] - lp2[t])
             PP.append(t); t = t + 1
-        # build tree, Z = [leaf1, leaf2, weight, #leaves]
+
+    # build tree, Z = [leaf1, leaf2, weight, #leaves]
     p = 0
     Z = []
     dye = {}
@@ -57,7 +60,7 @@ def bhclust(dat, family, alpha, r = 0.001):
         else:
             dye[N + p] = "#0013FF"
 
-        x0.append(x[idx]); d0.append(d[idx]); ml.append(log(exp(lp1[idx])+exp(lp2[idx])))
+        x0.append(x[idx]); d0.append(d[idx]); ml.append(lp1[idx] + log(1+exp(lp2[idx] - lp1[idx])))
         rm = set(Z[p][:2])
         SS = [y for y in SS if y not in rm]
         if len(SS) == 0:
@@ -66,10 +69,12 @@ def bhclust(dat, family, alpha, r = 0.001):
         for q in SS:
             c1.append(N+p); c2.append(q)
             x.append(x0[N+p] + x0[q])
-            d.append(alpha * gamma(len(x[t])) + d0[N+p] * d0[q])
 
-            lp1.append(mlfunc(dat[x[t],:]) + np.log(alpha) + gammaln(len(x[t])) - np.log(d[t]))
-            lp2.append(ml[N+p] + ml[q] + np.log(d0[N+p]) + np.log(d0[q]) - np.log(d[t]))
+            u = la + gammaln(len(x[t]))
+            v = d0[N+p] + d0[q]
+            d.append((u + log(1 + exp(v - u))))
+            lp1.append(mlfunc(dat[x[t],:]) + la + gammaln(len(x[t])) - d[t])
+            lp2.append(ml[N+p] + ml[q] + d0[N+p] + d0[q] - d[t])
             lodds.append(lp1[t] - lp2[t])
             PP.append(t); t = t + 1
 

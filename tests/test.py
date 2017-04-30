@@ -5,7 +5,7 @@ from scipy.cluster.hierarchy import dendrogram
 
 #-------------multivariate data------------#
 #dat = np.genfromtxt('tests/dat1.csv', delimiter=',', skip_header=1)
-mdat = array([[ 0.93637874,  1.61258974],
+mdat = np.array([[ 0.93637874,  1.61258974],
        [ 1.95192875,  2.84452075],
        [ 2.07671748,  3.24442548],
        [ 3.122903  ,  4.516753  ],
