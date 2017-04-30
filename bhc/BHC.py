@@ -1,8 +1,9 @@
+import numpy as np
 from numpy import exp, log
 from functools import partial
 from scipy.special import gamma, gammaln
 
-def bhc(dat, family, alpha, r = 0.001):
+def bhclust(dat, family, alpha, r = 0.001):
     """Return a matrix in the format of linkage matrix for dendrogram
         @dat: N records of data with k columns
         @family: function to specify distribution for data. {"multivariate", "bernoulli"}
@@ -20,7 +21,7 @@ def bhc(dat, family, alpha, r = 0.001):
         #m = np.mean(np.vstack((dat, np.ones(k)*cc, np.zeros(k))), axis=0)
         #alp= m*2; beta=(1-m)*2
         alp = 0.001; beta = 0.01
-        mlfunc = partial(bb, α=alp, β=beta)
+        mlfunc = partial(bb, alp=alp, beta=beta)
 
     # leaf nodes
     SS = list(range(N))
@@ -134,13 +135,13 @@ def niw(X, m, S, r):
 
     return np.log(ml)
 
-def bb(X, α=0.001, β=0.01):
+def bb(X, alp=0.001, beta=0.01):
     """Return marginal likelihood for bernoulli data using the conjugate prior distribution Bernoulli-Beta
        @X: N records of data with k columns
-       @α, β: hyperparmeter for Beta distribution
+       @alpha, beta: hyperparmeter for Beta distribution
     """
     md = np.sum(X,axis=0)
     N = X.shape[0]
-    num = gammaln(α+β) + gammaln(α+md) + gammaln(β+N-md)
-    den = gammaln(α) + gammaln(β) + gammaln(α+β+N)
+    num = gammaln(alp+beta) + gammaln(alp+md) + gammaln(beta+N-md)
+    den = gammaln(alp) + gammaln(beta) + gammaln(alp+beta+N)
     return np.sum(num - den)
