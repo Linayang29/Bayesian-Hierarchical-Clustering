@@ -28,10 +28,9 @@
 
 \section{Abstract}
 
+Hierarchical clustering is commonly used in unsupervised learning. There are several limitations to the traditional hierarchical clustering, including no guide to determine the appropriate number of clusters to prune the tree, difficult to choose suitable distance metric, and lack of probability based criterion for model evaluation. To overcome these limitations, \cite{heller_bayesian_2005} developed a Bayesian hierarchical clustering algorithm. This algorithm fits a probabilistic model to the data and uses marginal likelihoods as criteria for choosing nodes to merge. Purity score was used to evaluate the performance of the algorithm and to compare with the traditional hierarchical clustering approaches.
 
-Hierarchical clustering is commonly used in unsupervised learning. There are several limitations to the traditional hierarchical clustering, including no guide to pre-specify number of clusters, difficult to choose suitable distance metric, and lack of probability based criterion for model evaluation. To overcome these limitations, \cite{heller_bayesian_2005} developed a Bayesian hierarchical clustering based on Dirichlet process mixtures. It uses marginal likelihoods and Bayesian hypothesis testing as criteria for merging cluster.
-
-Key words: Bayesian Methods, unsupervised learning, hierarchical model, clustering analysis 
+Key words: Bayesian Methods, hierarchical clustering, unsupervised learning, marginal likelihood, purity score
 % 250 words or less. Identify 4-6 key phrases.
 % Is the abstract readable and clear?
 
@@ -42,6 +41,14 @@ Key words: Bayesian Methods, unsupervised learning, hierarchical model, clusteri
 % % What are its advantages and disadvantages relative to other algorithms?
 % % How will you use it in your research?
 % % Is the background readable and clear?
+
+Agglomerative hierarchical clustering is a bottom up hierarchical clustering method. It assigns each data point to its own cluster and iteratively merges the two clusters that have the least distance until all the clusters are merged to a single cluster. This hierarchical clustering aims to generate a hierarchical structure that consistent with the organization of the real data. There are several disadvantages of traditional hierarchical clustering. 1. It provides no guide to determine the appropriate number of clusters to prune the tree. 2. It is difficult to choose suitable distance metric. 3. It does not incorporate the probabilistic distribution of the data, so it is hard to make comparison between other clustering approaches.
+
+The Bayesian hierarchical clustering (BHC) algorithm fits a probabilistic model to the data and uses marginal likelihoods to choose which clusters to merge. It calculates the probability that the merged two clusters are from the same mixture class, and compares it with all the other potential merge combinations.
+
+This BHC algorithm can be applied to various kinds of data. For example, we can apply it to classify patients who have a specific type of cancer into subgroups based on their genetic expression data. In this paper, they applied it to multivariate Gaussian, Bernoulli and multinomial data.
+
+
 
 \section{Algorithm}
 % First, explain in plain English what the algorithm does.
@@ -148,14 +155,12 @@ Key words: Bayesian Methods, unsupervised learning, hierarchical model, clusteri
 % Find two other algorihtms that addresss a similar problem. Perform a comparison - for example, of accurary or speed. You can use native libraires of the other algorithms - you do not need to code them yourself. Comment on your observations.
 % Comparative analysis for each new version with time and timeit magic
 % Was the comarative analysis done well?
-\section{Discussion}
-% Your thoughts on the algorithm. Does it fulfill a particular need? How could it be generalized to other problem domains? What are its limiations and how could it be improved further?
-% Is the discussion readable and clear?
-We wrote a function to calculate the purity score which is the evaluation method used in Heller's BHC paper. The purity score calculates as follows:
-Pick two leaves i, j uniformly at random with restriction that i, j are from same class, and then find the smallest subtree containing i and j. Find all leaves that locate in this subtree and calculate the proportion of leaves that are from the same class as i (j) in the subtree. This proportion is the purity score we need. We compared this purity score calculated from BHC to 3 kinds of traditional agglomerative clustering using average, single, and complete linkage. We tested their performance on synthetic data, as well as real binary data from CEDAR dataset and real multivariate datasets obtained from other publications.
 
+We wrote a function to calculate the purity score which is the evaluation method used in Heller's BHC paper. The purity score is calculated as follows:
+Pick two leaves i, j uniformly at random with restriction that i, j are from same class, and then find the smallest subtree containing i and j. Find all leaves that locate in this subtree and calculate the proportion of leaves that are from the same class as i (j) in the subtree. This proportion is the purity score we need. We compared this purity score calculated from BHC to 3 kinds of traditional agglomerative clustering using average, single, and complete linkage. We tested their performance on synthetic data generated by us s well as synthetic dataset obtained from other publications. We also obtained some real data from CEDAR dataset for testing.
 
-- Sensitivity analysis
+We find that the BHC algorithm out performs traditional agglomerative clustering approaches when clustering binary data. BHC algorithm performs better than others when it was applied to our synthetic Gaussian multivariate data. BHC does not perform as good as others when applied to "aggregation" data, but its purity score is still reasonable high (0.788). But for the "spiral" data, only clustering method using single-linkage has a high purity score (1.0), BHC and other two clustering methods all have low purity score (~0.3).
+
 \begin{center}
   \renewcommand{\arraystretch}{0.7}
   \begin{tabular}{lrrrr}
@@ -171,7 +176,9 @@ CEDA      &   0.572 & 0.73  & 0.863  & 0.978 \\
   \end{tabular}
 \end{center}
 
-
+\section{Discussion}
+% Your thoughts on the algorithm. Does it fulfill a particular need? How could it be generalized to other problem domains? What are its limiations and how could it be improved further?
+% Is the discussion readable and clear?
 
 \section{Code}
 
