@@ -7,7 +7,7 @@ from numpy import exp, log
 from functools import partial
 from scipy.special import gammaln
 
-def bhclust(dat, family, alpha, r = 0.001):
+def bhclust_fast(dat, family, alpha, r = 0.001):
     """Return a matrix in the format of linkage matrix for dendrogram
         @dat: N records of data with k columns
         @family: function to specify distribution for data. {"multivariate", "bernoulli"}

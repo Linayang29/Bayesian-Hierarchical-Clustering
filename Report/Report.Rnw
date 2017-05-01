@@ -4,11 +4,13 @@
 \usepackage{indentfirst}
 %\usepackage{setspace}
 \usepackage{float}
+\usepackage{booktabs}
 \linespread{1.3}
 
 \usepackage[linesnumbered, ruled, vlined]{algorithm2e}
 \newcommand{\PP}{\mathbb{P}}
 \newcommand{\SSS}{\mathbb{S}}
+\newcommand{\pr}{\text{P}}
 \DeclareMathOperator*{\argmax}{arg\,max}
 
 \usepackage[nottoc,numbib]{tocbibind}
@@ -23,7 +25,6 @@
 \date{\today}
 
 \begin{document}
-\SweaveOpts{concordance=TRUE}
 \maketitle
 
 \section{Abstract}
@@ -31,7 +32,7 @@
 
 Hierarchical clustering is commonly used in unsupervised learning. There are several limitations to the traditional hierarchical clustering, including no guide to pre-specify number of clusters, difficult to choose suitable distance metric, and lack of probability based criterion for model evaluation. To overcome these limitations, \cite{heller_bayesian_2005} developed a Bayesian hierarchical clustering based on Dirichlet process mixtures. It uses marginal likelihoods and Bayesian hypothesis testing as criteria for merging cluster.
 
-Key words: Bayesian Methods, unsupervised learning, hierarchical model, clustering analysis 
+Key words: Bayesian Methods, unsupervised learning, hierarchical model, clustering analysis
 % 250 words or less. Identify 4-6 key phrases.
 % Is the abstract readable and clear?
 
@@ -44,12 +45,30 @@ Key words: Bayesian Methods, unsupervised learning, hierarchical model, clusteri
 % % Is the background readable and clear?
 
 \section{Algorithm}
+This algorithm calculates the probability of merging for each two subtrees, and build the whole tree bottom-up, and finally returns a matrix in the structure of input matrix for `dendrogram` function in `Scipy` module. It can be used to cluster data with multivariate normal distribution or Bernoulli distribution, and is possible to be extended to other types of data.
+
+For each pair of clusters, the hypotheses we need to test are $H_1$ vs. $H_2$, representing either merge or stay unmerged. And the probability of being merged will be calculated to make the decision. This probability, denoted by $r$, is given by Bayes' rule,
+$$r = \frac{\pi \pr(D\mid H_1)}{\pr(D\mid T)}$$
+where $\pr(D\mid H_1)$ is the probability of the data under $H_1$, and it can be computed by distribution function of the data and corresponding conjugate prior. $\pi$ is the prior that all data in the two clusters belong to one cluster, and $\pr (D\mid T)$ is a weighed sum of the probability of the data under each hypothesis, which can be expressed as
+$$\pr(D_k \mid T_k) = \pi_k \pr(D_k \mid H_1^k) + (1-\pi_k) \pr(D_i \mid T_i)\pr(D_j \mid T_j)$$
+Based on the equation above, $\pr(D_k \mid T_k)$ has to be calculated recursively, since it uses probabilities of data under its subtrees to determine the probability of data in current tree. The cutoff for not merging is 0.5 because of only two hypotheses considered.
+
+The algorithm basicly consists of three parts:
+\begin{enumerate}
+  \item Line 1 \- 4 is the initialization part. $\pr(D\mid T)$'s are calculated given distritbution of data assigned to all the leaf nodes, $\SSS$ is a set of indices containing all the data clusters, and every time two clusters are merged togther, their indices would be removed from $\SSS$; every time a new cluster is built up, the newly assigned index associated with it would be added to $\SSS$. $\textsc{Family}$ is a function defined elsewhere with two options, "niw" for multivariate normal data and "bb" for Bernouli.
+  \item Line 5 \- 12 describe the process of obtaining the probabilities of merging for pairwise leaf nodes using the equation above, and each of the potential clusters have an index stored in $\PP$. Similar to $\SSS$, $\PP$ keeps adding/deleting indices to maintain a set of combinations of all current available clusters during building the whole tree.
+  \item Line 13 \- 28 repeats the process of computing $\pr(D\mid T)$ for every two possible clusters, until $\SSS$ runs out of indices. In each run, the combination of the highest merging probability would be append to a list $Z$, which is a 4\-dimensional matrix, within each row first two numbers being the indices of two sub-clusters that have been merged, third number being weight evaluated as reciprocal of log odds, and the last being the number of nodes in the cluster.
+\end{enumerate}
+
+The code was checked by the clustering results against the ones in \cite{heller_bayesian_2005}, using similar data. Unfortunately so far there is no other package implementing the same algorithm to compare with, the only one found on \href{https://www.bioconductor.org/packages/release/bioc/html/BHC.html}{Bioconductor} is for multinomial and time-series data, which was not included in our implementation. 
+
+The performance of this method comparing with other clustering methods was evaluated using a $\textit{purity score}$, which will be elaborated in Section \ref{sec:comp}.
 % First, explain in plain English what the algorithm does.
 % Then describes the details of the algorihtm, using mathematical equations or pseudocode as appropriate.
 % Is the algorithm description clear and accurate?
 
 % Write tests to check correctness:
-% % Check boundary conditions
+% % Check boundary conditions23
 % % Are there known analytic/asymptotic solutions to compare against?
 % % Are there other packages implementing the algorithm to compare against?
 % % Are there alternative algorithms that should give the same answer?
@@ -109,6 +128,7 @@ Key words: Bayesian Methods, unsupervised learning, hierarchical model, clusteri
 \end{algorithm}
 
 \section{Optimization}
+
 % First implement the algorithm using plain Python in a straightforward way from the description of the algorihtm.
 % Then profile and optimize it using one or more apporpiate mathods, such as:
 
@@ -143,8 +163,10 @@ Key words: Bayesian Methods, unsupervised learning, hierarchical model, clusteri
 \subsection{Real data sets}
 % Test the algorithm on the real-world examples in the orignal paper if possible. Try to find at least one other real-world data set not in the original paper and test it on that. Describe and interpret the results.
 
-
+aggregation\cite{gionis_clustering_2007}
+spiral \cite{chang2004robust}
 \section{Comparative analysis}
+\label{sec: comp}
 % Find two other algorihtms that addresss a similar problem. Perform a comparison - for example, of accurary or speed. You can use native libraires of the other algorithms - you do not need to code them yourself. Comment on your observations.
 % Comparative analysis for each new version with time and timeit magic
 % Was the comarative analysis done well?
@@ -154,19 +176,17 @@ Key words: Bayesian Methods, unsupervised learning, hierarchical model, clusteri
 We wrote a function to calculate the purity score which is the evaluation method used in Heller's BHC paper. The purity score calculates as follows:
 Pick two leaves i, j uniformly at random with restriction that i, j are from same class, and then find the smallest subtree containing i and j. Find all leaves that locate in this subtree and calculate the proportion of leaves that are from the same class as i (j) in the subtree. This proportion is the purity score we need. We compared this purity score calculated from BHC to 3 kinds of traditional agglomerative clustering using average, single, and complete linkage. We tested their performance on synthetic data, as well as real binary data from CEDAR dataset and real multivariate datasets obtained from other publications.
 
-
-- Sensitivity analysis
 \begin{center}
-  \renewcommand{\arraystretch}{0.7}
+  %\renewcommand{\arraystretch}{0.7}
   \begin{tabular}{lrrrr}
     \toprule
-      & SINGLE_LINKAGE & COMPLETE_LINKAGE & AVERAGE_LINKAGE & BHC  \\
+      & SINGLE & COMPLETE & AVERAGE & BHC  \\
     \midrule
-SYNTHETIC_multivariate  & 0.689 & 0.6 & 0.689 & 1.0 \\
+SYNTHETIC\_multivariate  & 0.689 & 0.6 & 0.689 & 1.0 \\
 Aggregation      &  0.85 & 1.0  & 1.0 & 0.788 \\
 Spiral  &  1.0 & 0.332 &  0.334 &  0.35 \\
-SYNTHETIC_binary  &  0.641 & 0.561 & 0.608 & 0.681 \\
-CEDA      &   0.572 & 0.73  & 0.863  & 0.978 \\
+SYNTHETIC\_binary  &  0.641 & 0.561 & 0.608 & 0.681 \\
+CEDAR      &   0.572 & 0.73  & 0.863  & 0.978 \\
   \bottomrule
   \end{tabular}
 \end{center}
@@ -175,7 +195,8 @@ CEDA      &   0.572 & 0.73  & 0.863  & 0.978 \\
 
 \section{Code}
 
-The repository can be found at \url{https://github.com/qxxxd/Bayesian-Hierarchical-Clustering}.
+The repository can be found at \url{https://github.com/qxxxd/bhc}. 
+
 % The code should be in a public GitHub repository with:
 % % A README file
 % % An open source license
