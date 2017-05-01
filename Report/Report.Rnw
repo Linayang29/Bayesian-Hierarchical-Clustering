@@ -29,19 +29,20 @@
 
 \section{Abstract}
 
+
 Hierarchical clustering is commonly used in unsupervised learning. There are several limitations to the traditional hierarchical clustering, including no guide to determine the appropriate number of clusters to prune the tree, difficult to choose suitable distance metric, and lack of probability based criterion for model evaluation. To overcome these limitations, \cite{heller_bayesian_2005} developed a Bayesian hierarchical clustering algorithm. This algorithm fits a probabilistic model to the data and uses marginal likelihoods as criteria for choosing nodes to merge. Purity score was used to evaluate the performance of the algorithm and to compare with the traditional hierarchical clustering approaches.
 
-<<<<<<< HEAD
-Key words: Bayesian Methods, hierarchical clustering, unsupervised learning, marginal likelihood, purity score
-=======
-Hierarchical clustering is commonly used in unsupervised learning. There are several limitations to the traditional hierarchical clustering, including no guide to pre-specify number of clusters, difficult to choose suitable distance metric, and lack of probability based criterion for model evaluation. To overcome these limitations, \cite{heller_bayesian_2005} developed a Bayesian hierarchical clustering based on Dirichlet process mixtures. It uses marginal likelihoods and Bayesian hypothesis testing as criteria for merging cluster.
-
-Key words: Bayesian Methods, unsupervised learning, hierarchical model, clustering analysis
->>>>>>> 9954c29d2476fd70f21504388a9dbfc7a95396b0
+\textbf{Key words:} Bayesian Methods, hierarchical clustering, unsupervised learning, marginal likelihood, purity score
 % 250 words or less. Identify 4-6 key phrases.
 % Is the abstract readable and clear?
 
 \section{Background}
+Agglomerative hierarchical clustering is a bottom up hierarchical clustering method. It assigns each data point to its own cluster and iteratively merges the two clusters that have the least distance until all the clusters are merged to a single cluster. This hierarchical clustering aims to generate a hierarchical structure that consistent with the organization of the real data. There are several disadvantages of traditional hierarchical clustering. 1. It provides no guide to determine the appropriate number of clusters to prune the tree. 2. It is difficult to choose suitable distance metric. 3. It does not incorporate the probabilistic distribution of the data, so it is hard to make comparison between other clustering approaches.
+
+The Bayesian hierarchical clustering (BHC) algorithm fits a probabilistic model to the data and uses marginal likelihoods to choose which clusters to merge. It calculates the probability that the merged two clusters are from the same mixture class, and compares it with all the other potential merge combinations.
+
+This BHC algorithm can be applied to various kinds of data. For example, we can apply it to classify patients who have a specific type of cancer into subgroups based on their genetic expression data. In this paper, they applied it to multivariate Gaussian, Bernoulli and multinomial data.
+
 % State the research paper you are using. Describe the concept of the algorithm and why it is interesting and/or useful. If appropriate, describe the mathematical basis of the algorithm. Some potential topics for the backgorund include:
 % % What problem does it address?
 % % What are known and possible applications of the algorithm?
@@ -49,16 +50,8 @@ Key words: Bayesian Methods, unsupervised learning, hierarchical model, clusteri
 % % How will you use it in your research?
 % % Is the background readable and clear?
 
-Agglomerative hierarchical clustering is a bottom up hierarchical clustering method. It assigns each data point to its own cluster and iteratively merges the two clusters that have the least distance until all the clusters are merged to a single cluster. This hierarchical clustering aims to generate a hierarchical structure that consistent with the organization of the real data. There are several disadvantages of traditional hierarchical clustering. 1. It provides no guide to determine the appropriate number of clusters to prune the tree. 2. It is difficult to choose suitable distance metric. 3. It does not incorporate the probabilistic distribution of the data, so it is hard to make comparison between other clustering approaches.
-
-The Bayesian hierarchical clustering (BHC) algorithm fits a probabilistic model to the data and uses marginal likelihoods to choose which clusters to merge. It calculates the probability that the merged two clusters are from the same mixture class, and compares it with all the other potential merge combinations.
-
-This BHC algorithm can be applied to various kinds of data. For example, we can apply it to classify patients who have a specific type of cancer into subgroups based on their genetic expression data. In this paper, they applied it to multivariate Gaussian, Bernoulli and multinomial data.
-
-
-
 \section{Algorithm}
-This algorithm calculates the probability of merging for each two subtrees, and build the whole tree bottom-up, and finally returns a matrix in the structure of input matrix for `dendrogram` function in `Scipy` module. It can be used to cluster data with multivariate normal distribution or Bernoulli distribution, and is possible to be extended to other types of data.
+This algorithm calculates the probability of merging for each two subtrees, and build the whole tree bottom-up, and finally returns a matrix in the structure of input matrix for \texttt{dendrogram} function in \texttt{Scipy} module. It can be used to cluster data with multivariate normal distribution or Bernoulli distribution, and is possible to be extended to other types of data.
 
 For each pair of clusters, the hypotheses we need to test are $H_1$ vs. $H_2$, representing either merge or stay unmerged. And the probability of being merged will be calculated to make the decision. This probability, denoted by $r$, is given by Bayes' rule,
 $$r = \frac{\pi \pr(D\mid H_1)}{\pr(D\mid T)}$$
@@ -68,9 +61,9 @@ Based on the equation above, $\pr(D_k \mid T_k)$ has to be calculated recursivel
 
 The algorithm basicly consists of three parts:
 \begin{enumerate}
-  \item Line 1 \- 4 is the initialization part. $\pr(D\mid T)$'s are calculated given distritbution of data assigned to all the leaf nodes, $\SSS$ is a set of indices containing all the data clusters, and every time two clusters are merged togther, their indices would be removed from $\SSS$; every time a new cluster is built up, the newly assigned index associated with it would be added to $\SSS$. $\textsc{Family}$ is a function defined elsewhere with two options, "niw" for multivariate normal data and "bb" for Bernouli.
-  \item Line 5 \- 12 describe the process of obtaining the probabilities of merging for pairwise leaf nodes using the equation above, and each of the potential clusters have an index stored in $\PP$. Similar to $\SSS$, $\PP$ keeps adding/deleting indices to maintain a set of combinations of all current available clusters during building the whole tree.
-  \item Line 13 \- 28 repeats the process of computing $\pr(D\mid T)$ for every two possible clusters, until $\SSS$ runs out of indices. In each run, the combination of the highest merging probability would be append to a list $Z$, which is a 4\-dimensional matrix, within each row first two numbers being the indices of two sub-clusters that have been merged, third number being weight evaluated as reciprocal of log odds, and the last being the number of nodes in the cluster.
+  \item Line 1 - 4 is the initialization part. $\pr(D\mid T)$'s are calculated given distritbution of data assigned to all the leaf nodes, $\SSS$ is a set of indices containing all the data clusters, and every time two clusters are merged togther, their indices would be removed from $\SSS$; every time a new cluster is built up, the newly assigned index associated with it would be added to $\SSS$. $\textsc{Family}$ is a function defined elsewhere with two options, "niw" for multivariate normal data and "bb" for Bernouli.
+  \item Line 5 - 12 describes the process of obtaining the probabilities of merging for pairwise leaf nodes using the equation above, and each of the potential clusters have an index stored in $\PP$. Similar to $\SSS$, $\PP$ keeps adding/deleting indices to maintain a set of combinations of all current available clusters during building the whole tree.
+  \item Line 13 - 28 repeats the process of computing $\pr(D\mid T)$ for every two possible clusters, until $\SSS$ runs out of indices. In each run, the combination of the highest merging probability would be append to a list $Z$, which is a 4\-dimensional matrix, within each row first two numbers being the indices of two sub-clusters that have been merged, third number being weight evaluated as reciprocal of log odds, and the last being the number of nodes in the cluster.
 \end{enumerate}
 
 The code was checked by the clustering results against the ones in \cite{heller_bayesian_2005}, using similar data. Unfortunately so far there is no other package implementing the same algorithm to compare with, the only one found on \href{https://www.bioconductor.org/packages/release/bioc/html/BHC.html}{Bioconductor} is for multinomial and time-series data, which was not included in our implementation. 
@@ -142,6 +135,9 @@ The performance of this method comparing with other clustering methods was evalu
 
 \section{Optimization}
 
+This algorithm roughly involves twice iterations through all leaf nodes, therefore the overall computational complexity is $O(n^2)$, and the inefficiency can be identified by Cython annotation in the profiling results(\url{/bhc/tests/bottleneck_check.ipynb}). Since the body of the code is wrapped in a long loop and contains functions from third-party modules, it is hard to optimize the code using \texttt{numba} or \texttt{pyspark}. And since the algorithm calculates one point at each step, vectorization can hardly be incorporated, and python lists were used instead of \texttt{numpy} in case that overhead could not pay off. Some small calculation results were also cached to avoid repeated calculations. However, the code can be partly optimized. For multivariate normal data, the marginal likelihood involves lots of matrix multiplications, therefore, we rewrote all the relevant functions into C++ code (\url{/bhc/bhc/helper.cpp}), wrapped it using \texttt{pybind11}, and made a new function called \texttt{bhclust\_fast}. The speed is more than three times as fast as for the original code for small data set (Toy data set, 18 obs). For larger sets of multivariate data, we have experienced difficulties in timing the original code, since the docker usually stopped computation before it was done. However, the C++ accelerated code could give a system runtime of 1.02s and CPU time of 53.8s for a $788\times 2$ data set. More comparisons of speed can be found in \url{/bhc/tests/comparison_speed.ipynb}.
+
+
 % First implement the algorithm using plain Python in a straightforward way from the description of the algorihtm.
 % Then profile and optimize it using one or more apporpiate mathods, such as:
 
@@ -167,33 +163,80 @@ The performance of this method comparing with other clustering methods was evalu
 % Has the algorihtm been optimized?
 
 \section{Application}
+
+Hierarchical clustering is widely used since real-world data often show a hierarchical pattern by nature. We used data in different area to test the performance of method. Here we showed Bayesian hierarchical clustering results against hierarchical clustering with average linkage for 1 synthetic data set and 2 real data sets. 
 % Are the applicaitons to simulated/real data clear and useful?
 % Is the analyiss reproducible? Re-run tests after optimization to check that output has not changed
 \subsection{Simulated data sets}
 % Are there specific inputs that give known outuputs (e.g. there might be closed form solutions for special input cases)? How does the algorithm perform on these?
 % If no such input cases are available (or in addition to such input cases), how does the algorithm perform on simulated data sets for which you know the "truth"?
 
+This is a data simulated by \cite{gionis_clustering_2007}, with dimension $788\times 2$. The scatter plot (Figure \ref{aggsc}) displays that the seven clusters in the data have clear boundaries between each other, suggesting this might be a easy classification question. The results for the two types of clustering are shown in Figure \ref{aggcls}. The different colors in the texts on x-axis are the true labels for all the classes in this data, which are numbers 0 - 7.
+
+The Bayesian hierarchical clustering shows a feature similar to single linkage, but with more condensed distance.
+\begin{figure}[H]
+  \caption{Scatter plot of the original aggregation data}
+  \centering
+  \includegraphics[width=0.7\textwidth]{Pics/agg_scatter.png}
+  \label{fig:aggsc}
+\end{figure}
+\begin{figure}[H]
+  \caption{Dendrograms for hierarchical clustering of average link and Bayesian method}
+  \centering
+  \includegraphics[width=1\textwidth]{Pics/agg_avg.png}
+  \includegraphics[width=1\textwidth]{Pics/agg_bhc.png}
+  \label{fig:aggcls}
+\end{figure}
+
+
 \subsection{Real data sets}
 % Test the algorithm on the real-world examples in the orignal paper if possible. Try to find at least one other real-world data set not in the original paper and test it on that. Describe and interpret the results.
 
-aggregation\cite{gionis_clustering_2007}
-spiral \cite{chang2004robust}
-\section{Comparative analysis}
-\label{sec: comp}
-% Find two other algorihtms that addresss a similar problem. Perform a comparison - for example, of accurary or speed. You can use native libraires of the other algorithms - you do not need to code them yourself. Comment on your observations.
-% Comparative analysis for each new version with time and timeit magic
-% Was the comarative analysis done well?
+\begin{figure}[H]
+  \caption{Heatmap of the original seeds data}
+  \centering
+  \includegraphics[width=0.7\textwidth]{Pics/seeds_heatmap.png}
+  \label{fig:heat}
+\end{figure}
+\begin{figure}[H]
+  \caption{Dendrograms for hierarchical clustering of average link and Bayesian method}
+  \centering
+  \includegraphics[width=1\textwidth]{Pics/seeds_avg.png}
+  \includegraphics[width=1\textwidth]{Pics/seeds_bhc.png}
+  \label{fig:cls}
+\end{figure}
 
-<<<<<<< HEAD
+
+\begin{figure}[H]
+  \caption{Heatmap of the original CEDAR data}
+  \centering
+  \includegraphics[width=0.7\textwidth]{Pics/digits_heatmap.png}
+  \label{fig:heat}
+\end{figure}
+\begin{figure}[H]
+  \caption{Dendrograms for hierarchical clustering of average link and Bayesian method}
+  \centering
+  \includegraphics[width=1\textwidth]{Pics/digits_avg.png}
+  \includegraphics[width=1\textwidth]{Pics/digits_bhc.png}
+  \label{fig:cls}
+\end{figure}
+
+
+seeds \cite{charytanowicz_complete_2010}
+aggregation\cite{gionis_clustering_2007}
+
+\section{Comparative analysis}
+\label{sec:comp}
+
 We wrote a function to calculate the purity score which is the evaluation method used in Heller's BHC paper. The purity score is calculated as follows:
+
 Pick two leaves i, j uniformly at random with restriction that i, j are from same class, and then find the smallest subtree containing i and j. Find all leaves that locate in this subtree and calculate the proportion of leaves that are from the same class as i (j) in the subtree. This proportion is the purity score we need. We compared this purity score calculated from BHC to 3 kinds of traditional agglomerative clustering using average, single, and complete linkage. We tested their performance on synthetic data generated by us s well as synthetic dataset obtained from other publications. We also obtained some real data from CEDAR dataset for testing.
 
-We find that the BHC algorithm out performs traditional agglomerative clustering approaches when clustering binary data. BHC algorithm performs better than others when it was applied to our synthetic Gaussian multivariate data. BHC does not perform as good as others when applied to "aggregation" data, but its purity score is still reasonable high (0.788). But for the "spiral" data, only clustering method using single-linkage has a high purity score (1.0), BHC and other two clustering methods all have low purity score (~0.3).
+We find that the BHC algorithm outperforms traditional agglomerative clustering approaches when clustering binary data (Table ). BHC algorithm performs better than others when it was applied to our synthetic Gaussian multivariate data. BHC does not perform as good as others when applied to "aggregation" data, but its purity score is still reasonable high (0.788). But for the "spiral" data, only clustering method using single-linkage has a high purity score (1.0), BHC and other two clustering methods all have low purity score (~0.3).
 
-=======
->>>>>>> 9954c29d2476fd70f21504388a9dbfc7a95396b0
-\begin{center}
+\begin{table}[h]
   %\renewcommand{\arraystretch}{0.7}
+  \centering
   \begin{tabular}{lrrrr}
     \toprule
       & SINGLE & COMPLETE & AVERAGE & BHC  \\
@@ -205,11 +248,20 @@ SYNTHETIC\_binary  &  0.641 & 0.561 & 0.608 & 0.681 \\
 CEDAR      &   0.572 & 0.73  & 0.863  & 0.978 \\
   \bottomrule
   \end{tabular}
-\end{center}
+  \caption{Comparison results of four methods on six data sets}
+  \label{tab:comp}
+\end{table}
+
+% Find two other algorihtms that addresss a similar problem. Perform a comparison - for example, of accurary or speed. You can use native libraires of the other algorithms - you do not need to code them yourself. Comment on your observations.
+% Comparative analysis for each new version with time and timeit magic
+% Was the comarative analysis done well?
 
 \section{Discussion}
 % Your thoughts on the algorithm. Does it fulfill a particular need? How could it be generalized to other problem domains? What are its limiations and how could it be improved further?
 % Is the discussion readable and clear?
+
+
+
 
 \section{Code}
 
