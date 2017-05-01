@@ -23,12 +23,15 @@
 \date{\today}
 
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 \maketitle
 
 \section{Abstract}
 
 
-Hierarchical clustering is commonly used in unsupervised learning. There are several limitations to the traditional hierarchical clustering, including no guide to pre-specify number of clusters, difficult to choose suitable distance metric, and lack of probability based criterion for model evaluation. To overcome these limitations, \cite{heller_bayesian_2005} developed a Bayesian hierarchical clustering based on Dirichlet process mixtures. It uses marginal likelihoods and Bayesian hypothesis testing as criteria for merging cluster. 
+Hierarchical clustering is commonly used in unsupervised learning. There are several limitations to the traditional hierarchical clustering, including no guide to pre-specify number of clusters, difficult to choose suitable distance metric, and lack of probability based criterion for model evaluation. To overcome these limitations, \cite{heller_bayesian_2005} developed a Bayesian hierarchical clustering based on Dirichlet process mixtures. It uses marginal likelihoods and Bayesian hypothesis testing as criteria for merging cluster.
+
+Key words: Bayesian Methods, unsupervised learning, hierarchical model, clustering analysis 
 % 250 words or less. Identify 4-6 key phrases.
 % Is the abstract readable and clear?
 
@@ -64,7 +67,7 @@ Hierarchical clustering is commonly used in unsupervised learning. There are sev
   \KwIn{Data $X=(X_0, X_1, ..., X_N)$, $family \in\{niw\}$, hyperparameter $\alpha$, scaling factor on the prior precision of the mean $r$.}
   \KwOut{A linkage matrix $Z$}
   Set $\SSS =\emptyset$
-  
+
   \For{$l\in \{0,1,\ldots, N-1\}$}{
     $n^0_l = 1$, $d^0_l = \alpha$, $X^0_l = X_l$, $ml_l = \textsc{family}(X^0_l)$ \\
     $\SSS = \SSS \cup \{l\}$
@@ -98,7 +101,7 @@ Hierarchical clustering is commonly used in unsupervised learning. There are sev
       $logodds_t = \log{P_{1,t}} - \log{P_{2,t}}$ \\
       $\PP = \PP \cup \{t\}$, $t=t+1$
     }
-    $\PP = \PP \setminus \{r: c_{1,r} \in rm \vee c_{2,r} \in rm\}$\\ 
+    $\PP = \PP \setminus \{r: c_{1,r} \in rm \vee c_{2,r} \in rm\}$\\
     $\SSS = \SSS \cup \{N+p\}$, $p = p + 1$
   }
 
@@ -148,6 +151,27 @@ Hierarchical clustering is commonly used in unsupervised learning. There are sev
 \section{Discussion}
 % Your thoughts on the algorithm. Does it fulfill a particular need? How could it be generalized to other problem domains? What are its limiations and how could it be improved further?
 % Is the discussion readable and clear?
+We wrote a function to calculate the purity score which is the evaluation method used in Heller's BHC paper. The purity score calculates as follows:
+Pick two leaves i, j uniformly at random with restriction that i, j are from same class, and then find the smallest subtree containing i and j. Find all leaves that locate in this subtree and calculate the proportion of leaves that are from the same class as i (j) in the subtree. This proportion is the purity score we need. We compared this purity score calculated from BHC to 3 kinds of traditional agglomerative clustering using average, single, and complete linkage. We tested their performance on synthetic data, as well as real binary data from CEDAR dataset and real multivariate datasets obtained from other publications.
+
+
+- Sensitivity analysis
+\begin{center}
+  \renewcommand{\arraystretch}{0.7}
+  \begin{tabular}{lrrrr}
+    \toprule
+      & SINGLE_LINKAGE & COMPLETE_LINKAGE & AVERAGE_LINKAGE & BHC  \\
+    \midrule
+SYNTHETIC_multivariate  & 0.689 & 0.6 & 0.689 & 1.0 \\
+Aggregation      &  0.85 & 1.0  & 1.0 & 0.788 \\
+Spiral  &  1.0 & 0.332 &  0.334 &  0.35 \\
+SYNTHETIC_binary  &  0.641 & 0.561 & 0.608 & 0.681 \\
+CEDA      &   0.572 & 0.73  & 0.863  & 0.978 \\
+  \bottomrule
+  \end{tabular}
+\end{center}
+
+
 
 \section{Code}
 
