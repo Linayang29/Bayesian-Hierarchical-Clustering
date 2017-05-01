@@ -18,7 +18,9 @@ def bhclust(dat, family, alpha, r = 0.001):
     if family == "multivariate":
         m = np.mean(dat, axis=0).reshape(k, 1)
         S = np.cov(dat.T)/10 # precision?
-        mlfunc = partial(niw, m=m, S=S, r=r)
+        def mlfunc(X):
+            return niw(X, m, S, r)
+
     elif family == "bernoulli":
         #r=0.01
         m = np.mean(np.vstack((dat, np.ones(k)*r, np.zeros(k))), axis=0)
@@ -45,7 +47,7 @@ def bhclust(dat, family, alpha, r = 0.001):
             u = la + gammaln(len(x[t]))
             v = d0[i] + d0[j]
             d.append((u + log(1 + exp(v - u))))
-            lp1.append(mlfunc(dat[x[t],:]) + np.log(alpha) + gammaln(len(x[t])) - d[t])
+            lp1.append(mlfunc(dat[x[t],:]) + la + gammaln(len(x[t])) - d[t])
             lp2.append(ml[i] + ml[j] + d0[i] + d0[j] - d[t])
             lodds.append(lp1[t] - lp2[t])
             PP.append(t); t = t + 1
@@ -113,7 +115,7 @@ def scale_matrix(X, N, k, r, m, S):
     t3 = 1/(N+r) * (xsum @ xsum.T)
     t4 = (r / (N + r)) * (m @ xsum.T + xsum @ m.T)
 
-    Sprime = S + t1 + t2 - t3 - t4  #? +t3
+    Sprime = S + t1 + t2 - t3 - t4
 
     return Sprime
 

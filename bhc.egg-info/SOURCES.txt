@@ -1,8 +1,0 @@
-setup.py
-bhc/__init__.py
-bhc/bhc.py
-bhc.egg-info/PKG-INFO
-bhc.egg-info/SOURCES.txt
-bhc.egg-info/dependency_links.txt
-bhc.egg-info/not-zip-safe
-bhc.egg-info/top_level.txt

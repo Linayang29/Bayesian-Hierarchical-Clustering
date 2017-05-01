@@ -24,6 +24,8 @@ mdat = np.array([[ 0.93637874,  1.61258974],
        [ 5.0430706 ,  5.2911986 ],
        [ 2.44081699,  6.35402999]])
 mdat.shape
+labm = ['A'] * 10 + ['B'] * 8
+labcols = {'A': 'y', 'B':'g'}
 
 # scatter plot
 plt.scatter(mdat[:,0], mdat[:,1])
@@ -33,13 +35,15 @@ plt.show()
 
 # dendrogram
 Zm, colorm = bhclust(mdat, family = "multivariate", alpha = 1, r = 0.001)
-dendrogram(Zm, link_color_func=lambda k : colorm[k])
+dendrogram(Zm, link_color_func=lambda k : colorm[k], labels = labm)
+ax = plt.gca()
+xlbls = ax.get_xmajorticklabels()
+for y in xlbls:
+    y.set_color(labcols[y.get_text()])
 plt.show()
 
 
 #-------------bernoulli data-------------#
-#bdat = np.genfromtxt('tests/bindat.csv', delimiter=',')
-
 def Bern_gen(nobs, k, theta, seed):
     """Generate Bernoulli distributed data"""
     np.random.seed(seed)
@@ -52,7 +56,8 @@ def Bern_gen(nobs, k, theta, seed):
         obs_list.append(X_i)
     return np.matrix(obs_list)
 
-#bdat = Bern_gen(30, 10, 0.5, 121)
+#bdat = Bern_gen(30, 10, 0.5, 121) # saved
+#bdat = np.genfromtxt('tests/bindat.csv', delimiter=',')
 
 bdat = np.array([[0, 1, 0, 1, 0, 0, 0, 0, 0, 0],
         [0, 1, 0, 0, 1, 0, 1, 0, 0, 1],
