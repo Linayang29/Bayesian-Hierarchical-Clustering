@@ -33,6 +33,8 @@ for i in range(mdat.shape[0]):
     plt.annotate(i, (mdat[i,0], mdat[i,1]))
 plt.show()
 
+
+
 # dendrogram
 Zm, colorm = bhclust(mdat, family = "multivariate", alpha = 1, r = 0.001)
 dendrogram(Zm, link_color_func=lambda k : colorm[k], labels = labm)
