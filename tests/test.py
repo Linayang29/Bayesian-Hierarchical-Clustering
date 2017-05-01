@@ -1,3 +1,4 @@
+import bhc
 from bhc import bhclust
 import numpy as np
 import matplotlib.pyplot as plt

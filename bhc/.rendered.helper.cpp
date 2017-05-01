@@ -1,8 +1,5 @@
-
-
 #include <pybind11/pybind11.h>
 #include <pybind11/eigen.h>
-#include <iostream>
 #include <Eigen/LU>
 
 namespace py = pybind11;
@@ -64,8 +61,8 @@ double niw(MatrixXd X, MatrixXd m, MatrixXd S, double r){
     return lml;
 }
 
-PYBIND11_PLUGIN(h1){
-    pybind11::module m("h1", "helper functions");
+PYBIND11_PLUGIN(helper){
+    pybind11::module m("helper", "helper functions");
     m.def("scale_matrix", &scale_matrix);
     m.def("niw", &niw);
     m.def("logdet", &logdet);
